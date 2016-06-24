@@ -2,14 +2,14 @@ package com.reflect.core;
 
 import com.reflect.annotation.ClassParams;
 import com.reflect.annotation.StringParams;
-import com.reflect.datatype.BaseBoolean;
-import com.reflect.datatype.BaseByte;
-import com.reflect.datatype.BaseChar;
-import com.reflect.datatype.BaseDouble;
-import com.reflect.datatype.BaseFloat;
-import com.reflect.datatype.BaseInt;
-import com.reflect.datatype.BaseLong;
-import com.reflect.datatype.BaseShort;
+import com.reflect.datatype.BasicBoolean;
+import com.reflect.datatype.BasicByte;
+import com.reflect.datatype.BasicChar;
+import com.reflect.datatype.BasicDouble;
+import com.reflect.datatype.BasicFloat;
+import com.reflect.datatype.BasicInt;
+import com.reflect.datatype.BasicLong;
+import com.reflect.datatype.BasicShort;
 import com.reflect.datatype.Unknown;
 
 import java.lang.reflect.AccessibleObject;
@@ -176,14 +176,14 @@ public final class Reflection {
      */
     private static Class[] replaceVirtualParamTypes(Class[] paramTypes) {
         List<Class> classes = Arrays.asList(paramTypes);
-        Collections.replaceAll(classes, BaseInt.class, int.class);
-        Collections.replaceAll(classes, BaseShort.class, short.class);
-        Collections.replaceAll(classes, BaseLong.class, long.class);
-        Collections.replaceAll(classes, BaseDouble.class, long.class);
-        Collections.replaceAll(classes, BaseFloat.class, long.class);
-        Collections.replaceAll(classes, BaseChar.class, long.class);
-        Collections.replaceAll(classes, BaseByte.class, long.class);
-        Collections.replaceAll(classes, BaseBoolean.class, long.class);
+        Collections.replaceAll(classes, BasicInt.class, int.class);
+        Collections.replaceAll(classes, BasicShort.class, short.class);
+        Collections.replaceAll(classes, BasicLong.class, long.class);
+        Collections.replaceAll(classes, BasicDouble.class, long.class);
+        Collections.replaceAll(classes, BasicFloat.class, long.class);
+        Collections.replaceAll(classes, BasicChar.class, long.class);
+        Collections.replaceAll(classes, BasicByte.class, long.class);
+        Collections.replaceAll(classes, BasicBoolean.class, long.class);
         return classes.toArray(paramTypes);
     }
 
