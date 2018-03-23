@@ -1,7 +1,5 @@
 package com.reflect.core;
 
-import com.reflect.datatype.Unknown;
-
 /**
  * Created by jrsen on 16-4-29.
  * StaticMethod object, Please define like this sample:

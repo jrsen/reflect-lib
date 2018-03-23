@@ -6,12 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by jrsen on 16-4-29.
- * 用于用Class array描述方法或者构造器的参数类型
- * (如果参数类型为未知类型则用{@link Unknown.class}代替)
+ * Created by jrsen on 18-3-23.
  */
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
-public @interface ClassParams {
-    Class[] value();
+public @interface StringParam5 {
+    String value();
 }

@@ -1,22 +1,31 @@
 package com.reflect.core;
 
+import com.reflect.annotation.ClassParam0;
+import com.reflect.annotation.ClassParam1;
+import com.reflect.annotation.ClassParam2;
+import com.reflect.annotation.ClassParam3;
+import com.reflect.annotation.ClassParam4;
+import com.reflect.annotation.ClassParam5;
+import com.reflect.annotation.ClassParam6;
+import com.reflect.annotation.ClassParam7;
+import com.reflect.annotation.ClassParam8;
+import com.reflect.annotation.ClassParam9;
 import com.reflect.annotation.ClassParams;
+import com.reflect.annotation.StringParam0;
+import com.reflect.annotation.StringParam1;
+import com.reflect.annotation.StringParam2;
+import com.reflect.annotation.StringParam3;
+import com.reflect.annotation.StringParam4;
+import com.reflect.annotation.StringParam5;
+import com.reflect.annotation.StringParam6;
+import com.reflect.annotation.StringParam7;
+import com.reflect.annotation.StringParam8;
+import com.reflect.annotation.StringParam9;
 import com.reflect.annotation.StringParams;
-import com.reflect.datatype.BasicBoolean;
-import com.reflect.datatype.BasicByte;
-import com.reflect.datatype.BasicChar;
-import com.reflect.datatype.BasicDouble;
-import com.reflect.datatype.BasicFloat;
-import com.reflect.datatype.BasicInt;
-import com.reflect.datatype.BasicLong;
-import com.reflect.datatype.BasicShort;
-import com.reflect.datatype.Unknown;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Created by jrsen on 16-4-29.
@@ -33,7 +42,7 @@ public final class Reflection {
 
         java.lang.reflect.Field[] injectFields = injectClass.getDeclaredFields();
         for (java.lang.reflect.Field injectField : injectFields) {
-            if ((injectField.getModifiers() & Modifier.STATIC) == 0) continue;
+            if (!Modifier.isStatic(injectField.getModifiers())) continue;
             Class<?> classType = injectField.getType();
             if (classType == Constructor.class) {
                 linkToConstructor(srcClazz, injectField);
@@ -50,56 +59,10 @@ public final class Reflection {
         return srcClazz;
     }
 
-    public static Method getMethod(Class clazz, String name, Class... args) {
-        try {
-            java.lang.reflect.Method method = clazz.getDeclaredMethod(name, args);
-            return new Method(method);
-        } catch (NoSuchMethodException e) {
-        }
-        return null;
-    }
-
-    public static StaticMethod getStaticMethod(Class clazz, String name, Class... args) {
-        try {
-            java.lang.reflect.Method method = clazz.getDeclaredMethod(name, args);
-            return new StaticMethod(method);
-        } catch (NoSuchMethodException e) {
-        }
-        return null;
-    }
-
-    public static Field getField(Class clazz, String name) {
-        try {
-            java.lang.reflect.Field field = clazz.getDeclaredField(name);
-            return new Field(field);
-        } catch (NoSuchFieldException e) {
-        }
-        return null;
-    }
-
-    public static StaticField getStaticField(Class clazz, String name) {
-        try {
-            java.lang.reflect.Field field = clazz.getDeclaredField(name);
-            return new StaticField(field);
-        } catch (NoSuchFieldException e) {
-        }
-        return null;
-    }
-
-    public static Constructor getConstructor(Class clazz, Class... args) {
-        try {
-            java.lang.reflect.Constructor constructor = clazz.getDeclaredConstructor(args);
-            return new Constructor(constructor);
-        } catch (NoSuchMethodException e) {
-        }
-        return null;
-    }
-
     private static void linkToConstructor(Class clazz, java.lang.reflect.Field injectField) {
         try {
-            Class[] requiredParamTypes = getRequiredParamTypes(injectField);
-            requiredParamTypes = fixConsUnknownParamTypes(clazz, requiredParamTypes);
-            java.lang.reflect.Constructor constructor = clazz.getDeclaredConstructor(requiredParamTypes);
+            Class[] typeParameters = getTypeParameters(injectField);
+            java.lang.reflect.Constructor constructor = clazz.getDeclaredConstructor(typeParameters);
             injectField.set(null, new Constructor(constructor));
         } catch (Throwable ignore) {
         }
@@ -107,10 +70,9 @@ public final class Reflection {
 
     private static void linkToMethod(Class clazz, java.lang.reflect.Field injectField) {
         try {
-            Class[] requiredParamTypes = getRequiredParamTypes(injectField);
+            Class[] typeParameters = getTypeParameters(injectField);
             String methodName = injectField.getName();
-            requiredParamTypes = fixMethodUnknownParamTypes(clazz, requiredParamTypes, methodName);
-            java.lang.reflect.Method method = clazz.getDeclaredMethod(methodName, requiredParamTypes);
+            java.lang.reflect.Method method = clazz.getDeclaredMethod(methodName, typeParameters);
             injectField.set(null, new Method(method));
         } catch (Throwable ignore) {
         }
@@ -118,10 +80,9 @@ public final class Reflection {
 
     private static void linkToStaticMethod(Class clazz, java.lang.reflect.Field injectField) {
         try {
-            Class[] requiredParamTypes = getRequiredParamTypes(injectField);
+            Class[] typeParameters = getTypeParameters(injectField);
             String methodName = injectField.getName();
-            requiredParamTypes = fixMethodUnknownParamTypes(clazz, requiredParamTypes, methodName);
-            java.lang.reflect.Method method = clazz.getDeclaredMethod(methodName, requiredParamTypes);
+            java.lang.reflect.Method method = clazz.getDeclaredMethod(methodName, typeParameters);
             injectField.set(null, new StaticMethod(method));
         } catch (Throwable ignore) {
         }
@@ -149,114 +110,95 @@ public final class Reflection {
      * @param object
      * @return
      */
-    private static Class[] getRequiredParamTypes(AccessibleObject object) {
-        Class[] requiredParamTypes = new Class[]{};
+    private static Class[] getTypeParameters(AccessibleObject object) {
+        Class[] typeparams;
         if (object.isAnnotationPresent(ClassParams.class)) {
-            requiredParamTypes = object.getAnnotation(ClassParams.class).value();
+            typeparams = object.getAnnotation(ClassParams.class).value();
         } else if (object.isAnnotationPresent(StringParams.class)) {
-            String[] values = object.getAnnotation(StringParams.class).value();
-            requiredParamTypes = new Class[values.length];
-            for (int i = 0; i < values.length; i++) {
+            String[] classtypes = object.getAnnotation(StringParams.class).value();
+            final int N = classtypes.length;
+            typeparams = new Class[N];
+            for (int i = 0; i < N; i++) {
                 try {
-                    requiredParamTypes[i] = Class.forName(values[i]);
+                    typeparams[i] = Class.forName(classtypes[i]);
                 } catch (ClassNotFoundException ignore) {
-                    requiredParamTypes[i] = Unknown.class;
                 }
             }
-        }
-        requiredParamTypes = replaceVirtualParamTypes(requiredParamTypes);
-        return requiredParamTypes;
-    }
-
-    /**
-     * Replace virtual class type
-     *
-     * @param paramTypes
-     * @return
-     */
-    private static Class[] replaceVirtualParamTypes(Class[] paramTypes) {
-        List<Class> classes = Arrays.asList(paramTypes);
-        Collections.replaceAll(classes, BasicInt.class, int.class);
-        Collections.replaceAll(classes, BasicShort.class, short.class);
-        Collections.replaceAll(classes, BasicLong.class, long.class);
-        Collections.replaceAll(classes, BasicDouble.class, long.class);
-        Collections.replaceAll(classes, BasicFloat.class, long.class);
-        Collections.replaceAll(classes, BasicChar.class, long.class);
-        Collections.replaceAll(classes, BasicByte.class, long.class);
-        Collections.replaceAll(classes, BasicBoolean.class, long.class);
-        return classes.toArray(paramTypes);
-    }
-
-    /**
-     * fix Constructor required param types
-     *
-     * @param clazz
-     * @param requiredParamTypes
-     * @returnn
-     */
-    private static Class[] fixConsUnknownParamTypes(Class clazz, Class[] requiredParamTypes) {
-        List<Class> classes = Arrays.asList(requiredParamTypes);
-        if (classes.contains(Unknown.class)) {
-            java.lang.reflect.Constructor[] constructors = clazz.getDeclaredConstructors();
-            for (java.lang.reflect.Constructor constructor : constructors) {
-                Class[] paramTypes = constructor.getParameterTypes();
-                if (equalsClassesIgnoreUnknown(requiredParamTypes, paramTypes)) {
-                    return paramTypes;
+        } else if (object.isAnnotationPresent(ClassParam0.class)
+                || object.isAnnotationPresent(ClassParam1.class)
+                || object.isAnnotationPresent(ClassParam2.class)
+                || object.isAnnotationPresent(ClassParam3.class)
+                || object.isAnnotationPresent(ClassParam4.class)
+                || object.isAnnotationPresent(ClassParam5.class)
+                || object.isAnnotationPresent(ClassParam6.class)
+                || object.isAnnotationPresent(ClassParam7.class)
+                || object.isAnnotationPresent(ClassParam8.class)
+                || object.isAnnotationPresent(ClassParam9.class)
+                || object.isAnnotationPresent(StringParam0.class)
+                || object.isAnnotationPresent(StringParam1.class)
+                || object.isAnnotationPresent(StringParam2.class)
+                || object.isAnnotationPresent(StringParam3.class)
+                || object.isAnnotationPresent(StringParam4.class)
+                || object.isAnnotationPresent(StringParam5.class)
+                || object.isAnnotationPresent(StringParam6.class)
+                || object.isAnnotationPresent(StringParam7.class)
+                || object.isAnnotationPresent(StringParam8.class)
+                || object.isAnnotationPresent(StringParam9.class)) {
+            Annotation[] annotations = object.getAnnotations();
+            final int N = annotations.length;
+            typeparams = new Class[N];
+            for (int i = 0; i < N; i++) {
+                Annotation annotation = annotations[i];
+                try {
+                    if (annotation instanceof ClassParam0) {
+                        typeparams[0] = ((ClassParam0) annotation).value();
+                    } else if (annotation instanceof ClassParam1) {
+                        typeparams[1] = ((ClassParam1) annotation).value();
+                    } else if (annotation instanceof ClassParam2) {
+                        typeparams[2] = ((ClassParam2) annotation).value();
+                    } else if (annotation instanceof ClassParam3) {
+                        typeparams[3] = ((ClassParam3) annotation).value();
+                    } else if (annotation instanceof ClassParam4) {
+                        typeparams[4] = ((ClassParam4) annotation).value();
+                    } else if (annotation instanceof ClassParam5) {
+                        typeparams[5] = ((ClassParam5) annotation).value();
+                    } else if (annotation instanceof ClassParam6) {
+                        typeparams[6] = ((ClassParam6) annotation).value();
+                    } else if (annotation instanceof ClassParam7) {
+                        typeparams[7] = ((ClassParam7) annotation).value();
+                    } else if (annotation instanceof ClassParam8) {
+                        typeparams[8] = ((ClassParam8) annotation).value();
+                    } else if (annotation instanceof ClassParam9) {
+                        typeparams[9] = ((ClassParam9) annotation).value();
+                    } else if (annotation instanceof StringParam0) {
+                        typeparams[0] = Class.forName(((StringParam0) annotation).value());
+                    } else if (annotation instanceof StringParam1) {
+                        typeparams[1] = Class.forName(((StringParam1) annotation).value());
+                    } else if (annotation instanceof StringParam2) {
+                        typeparams[2] = Class.forName(((StringParam2) annotation).value());
+                    } else if (annotation instanceof StringParam3) {
+                        typeparams[3] = Class.forName(((StringParam3) annotation).value());
+                    } else if (annotation instanceof StringParam4) {
+                        typeparams[4] = Class.forName(((StringParam4) annotation).value());
+                    } else if (annotation instanceof StringParam5) {
+                        typeparams[5] = Class.forName(((StringParam5) annotation).value());
+                    } else if (annotation instanceof StringParam6) {
+                        typeparams[6] = Class.forName(((StringParam6) annotation).value());
+                    } else if (annotation instanceof StringParam7) {
+                        typeparams[7] = Class.forName(((StringParam7) annotation).value());
+                    } else if (annotation instanceof StringParam8) {
+                        typeparams[8] = Class.forName(((StringParam8) annotation).value());
+                    } else if (annotation instanceof StringParam9) {
+                        typeparams[9] = Class.forName(((StringParam9) annotation).value());
+                    }
+                } catch (ClassNotFoundException ignore) {
                 }
             }
+        } else {
+            typeparams = new Class[]{};
         }
-        return requiredParamTypes;
+        return typeparams;
     }
 
-    /**
-     * fix Method required param types
-     *
-     * @param clazz
-     * @param requiredParamTypes
-     * @param methodName
-     * @return
-     */
-    private static Class[] fixMethodUnknownParamTypes(Class clazz, Class[] requiredParamTypes, String methodName) {
-        List<Class> classes = Arrays.asList(requiredParamTypes);
-        if (classes.contains(Unknown.class)) {
-            java.lang.reflect.Method[] methods = clazz.getDeclaredMethods();
-            for (java.lang.reflect.Method method : methods) {
-                if (!method.getName().equals(methodName)) continue;
-                Class<?>[] paramTypes = method.getParameterTypes();
-                if (equalsClassesIgnoreUnknown(requiredParamTypes, paramTypes)) {
-                    return paramTypes;
-                }
-            }
-        }
-        return requiredParamTypes;
-    }
-
-    /**
-     * 比较两个class数组忽略Unknown类型
-     *
-     * @param a1
-     * @param a2
-     * @return
-     */
-    private static boolean equalsClassesIgnoreUnknown(Class[] a1, Class[] a2) {
-        if (a1 == a2) {
-            return true;
-        }
-        if (a1 == null || a2 == null || a1.length != a2.length) {
-            return false;
-        }
-        for (int i = 0; i < a1.length; i++) {
-            Object e1 = a1[i], e2 = a2[i];
-
-            if (e1 == null || e2 == null) {
-                return false;
-            }
-
-            if (e1.getClass() != Unknown.class && e2.getClass() != Unknown.class && e1.getClass() != e2.getClass()) {
-                return false;
-            }
-        }
-        return true;
-    }
 
 }
