@@ -1,2 +1,0 @@
-1.如果用ClassParams标记 反射的方法或者构造器包含未知的Class类型请用Unknown.class代替
-2.如果用StringParams标记 反射的方法或者构造器包含基本数据类型请使用com.reflect.datatype包下对应的类替换
