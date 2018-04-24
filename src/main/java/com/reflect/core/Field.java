@@ -8,24 +8,36 @@ package com.reflect.core;
  */
 public final class Field<T> {
 
-    private java.lang.reflect.Field field;
+    private final java.lang.reflect.Field field;
 
     public Field(java.lang.reflect.Field field) {
         this.field = field;
-        field.setAccessible(true);
+    }
+
+    @SuppressWarnings("unchecked")
+    public T getUnsafe(Object obj) throws Exception {
+        if (!field.isAccessible())
+            field.setAccessible(true);
+        return (T) field.get(obj);
     }
 
     public T get(Object obj) {
         try {
-            return (T) field.get(obj);
+            return getUnsafe(obj);
         } catch (Exception ignore) {
         }
         return null;
     }
 
+    public void setUnsafe(Object obj, T value) throws Exception {
+        if (!field.isAccessible())
+            field.setAccessible(true);
+        field.set(obj, value);
+    }
+
     public void set(Object obj, T value) {
         try {
-            field.set(obj, value);
+            setUnsafe(obj, value);
         } catch (Exception ignore) {
         }
     }

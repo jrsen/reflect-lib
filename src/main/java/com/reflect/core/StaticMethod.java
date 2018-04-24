@@ -2,30 +2,28 @@ package com.reflect.core;
 
 /**
  * Created by jrsen on 16-4-29.
- * StaticMethod object, Please define like this sample:
- *
- * @param ({String.class})//unknown class please use {@link Unknown} instead
- *                                  public static StaticMethod staticMethodName;
  */
 public final class StaticMethod<T> {
 
-    private java.lang.reflect.Method method;
+    private final java.lang.reflect.Method method;
 
     public StaticMethod(java.lang.reflect.Method method) {
         this.method = method;
-        method.setAccessible(true);
     }
 
-    public T invokeWithException(Object... args) throws Exception {
+    @SuppressWarnings("unchecked")
+    public T invokeUnsafe(Object... args) throws Exception {
+        if (!method.isAccessible())
+            method.setAccessible(true);
         return (T) method.invoke(null, args);
     }
 
     public T invoke(Object... args) {
         try {
-            return invokeWithException(args);
+            return invokeUnsafe(args);
         } catch (Throwable ignore) {
+            return null;
         }
-        return null;
     }
 
 }

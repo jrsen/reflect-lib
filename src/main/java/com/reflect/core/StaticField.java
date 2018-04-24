@@ -9,26 +9,39 @@ package com.reflect.core;
  */
 public final class StaticField<T> {
 
-    private java.lang.reflect.Field field;
+    private final java.lang.reflect.Field field;
 
     public StaticField(java.lang.reflect.Field field) {
         this.field = field;
-        field.setAccessible(true);
+    }
+
+    @SuppressWarnings("unchecked")
+    public T getUnsafe() throws Exception {
+        if (!field.isAccessible())
+            field.setAccessible(true);
+        return (T) field.get(null);
     }
 
     public T get() {
         try {
-            return (T) field.get(null);
+            return getUnsafe();
         } catch (Exception ignore) {
         }
         return null;
     }
 
+    public void setUnsafe(T value) throws Exception {
+        if (!field.isAccessible())
+            field.setAccessible(true);
+        field.set(null, value);
+    }
+
     public void set(T value) {
         try {
-            field.set(null, value);
+            setUnsafe(value);
         } catch (Exception ignore) {
         }
     }
+
 
 }

@@ -37,30 +37,33 @@ public final class Reflection {
         return srcClazz;
     }
 
-    private static void linkToConstructor(Class clazz, java.lang.reflect.Field injectField) {
+    private static void linkToConstructor(Class<?> clazz, java.lang.reflect.Field injectField) {
         try {
-            Class[] typeParameters = getTypeParameters(injectField);
+            Class<?>[] typeParameters = getTypeParameters(injectField);
             java.lang.reflect.Constructor constructor = clazz.getDeclaredConstructor(typeParameters);
+            if(!injectField.isAccessible()) injectField.setAccessible(true);
             injectField.set(null, new Constructor(constructor));
         } catch (Throwable ignore) {
         }
     }
 
-    private static void linkToMethod(Class clazz, java.lang.reflect.Field injectField) {
+    private static void linkToMethod(Class<?> clazz, java.lang.reflect.Field injectField) {
         try {
             Class[] typeParameters = getTypeParameters(injectField);
             String methodName = injectField.getName();
             java.lang.reflect.Method method = clazz.getDeclaredMethod(methodName, typeParameters);
+            if(!injectField.isAccessible()) injectField.setAccessible(true);
             injectField.set(null, new Method(method));
         } catch (Throwable ignore) {
         }
     }
 
-    private static void linkToStaticMethod(Class clazz, java.lang.reflect.Field injectField) {
+    private static void linkToStaticMethod(Class<?> clazz, java.lang.reflect.Field injectField) {
         try {
             Class[] typeParameters = getTypeParameters(injectField);
             String methodName = injectField.getName();
             java.lang.reflect.Method method = clazz.getDeclaredMethod(methodName, typeParameters);
+            if(!injectField.isAccessible()) injectField.setAccessible(true);
             injectField.set(null, new StaticMethod(method));
         } catch (Throwable ignore) {
         }
@@ -69,6 +72,7 @@ public final class Reflection {
     private static void linkToField(Class clazz, java.lang.reflect.Field injectField) {
         try {
             java.lang.reflect.Field field = clazz.getDeclaredField(injectField.getName());
+            if(!injectField.isAccessible()) injectField.setAccessible(true);
             injectField.set(null, new Field(field));
         } catch (Throwable ignore) {
         }
@@ -77,12 +81,13 @@ public final class Reflection {
     private static void linkToStaticField(Class clazz, java.lang.reflect.Field injectField) {
         try {
             java.lang.reflect.Field field = clazz.getDeclaredField(injectField.getName());
+            if(!injectField.isAccessible()) injectField.setAccessible(true);
             injectField.set(null, new StaticField(field));
         } catch (Throwable ignore) {
         }
     }
 
-    private static Class[] getTypeParameters(AccessibleObject object) {
+    private static Class<?>[] getTypeParameters(AccessibleObject object) {
         if (object.isAnnotationPresent(Parameter.class)) {
             Parameter param = object.getAnnotation(Parameter.class);
             Class[] typeParameters = param.value();
