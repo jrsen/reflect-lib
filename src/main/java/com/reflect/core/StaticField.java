@@ -3,9 +3,6 @@ package com.reflect.core;
 
 /**
  * Created by jrsen on 16-4-29.
- * StaticField object, Please define like this sample:
- * <p/>
- * public static StaticField fieldName;
  */
 public final class StaticField<T> {
 

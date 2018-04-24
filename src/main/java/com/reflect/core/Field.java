@@ -2,9 +2,6 @@ package com.reflect.core;
 
 /**
  * Created by jrsen on 16-4-29.
- * Field object, Please define like this sample:
- * <p>
- * public static Field fieldName;
  */
 public final class Field<T> {
 

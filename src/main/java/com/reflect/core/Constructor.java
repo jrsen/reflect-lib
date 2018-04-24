@@ -2,27 +2,28 @@ package com.reflect.core;
 
 /**
  * Created by jrsen on 16-4-29.
- * Constructor object, Please define like this sample:
- *
- * @param ({String.class})//unknown class please use {@link Unknown} instead
- *                                  public static Constructor constructor;
  */
 public final class Constructor<T> {
 
-    private java.lang.reflect.Constructor constructor;
+    private final java.lang.reflect.Constructor constructor;
 
     public Constructor(java.lang.reflect.Constructor constructor) {
         this.constructor = constructor;
-        constructor.setAccessible(true);
+    }
+
+    @SuppressWarnings("unchecked")
+    public T newInstanceUnSafe(Object... args) throws Exception {
+        if (!constructor.isAccessible())
+            constructor.setAccessible(true);
+        return (T) constructor.newInstance(args);
     }
 
     public T newInstance(Object... args) {
         try {
-            return (T) constructor.newInstance(args);
+            return newInstanceUnSafe(args);
         } catch (Throwable ignore) {
-            ignore.printStackTrace();
+            return null;
         }
-        return null;
     }
 
 }
