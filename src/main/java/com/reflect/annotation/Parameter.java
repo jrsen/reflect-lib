@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
 public @interface Parameter {
+    String name() default "";
     Class[] value() default {};
     Class c_arg0() default Void.class;
     Class c_arg1() default Void.class;
