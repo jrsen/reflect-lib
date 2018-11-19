@@ -65,8 +65,9 @@ public final class Reflection {
 
     private static void linkToMethod(Class<?> clazz, java.lang.reflect.Field injectField) {
         try {
-            String name = injectField.getAnnotation(Parameter.class).name();
-            Method<?> method = getMethod(clazz, name.isEmpty() ? injectField.getName() : name, getParameterTypes(injectField));
+            String name = injectField.isAnnotationPresent(Parameter.class) && !injectField.getAnnotation(Parameter.class).name().isEmpty()
+                ? injectField.getAnnotation(Parameter.class).name() : injectField.getName();
+            Method<?> method = getMethod(clazz, name, getParameterTypes(injectField));
             if (method != null) {
                 injectField.setAccessible(true);
                 injectField.set(null, method);
@@ -77,8 +78,9 @@ public final class Reflection {
 
     private static void linkToStaticMethod(Class<?> clazz, java.lang.reflect.Field injectField) {
         try {
-            String name = injectField.getAnnotation(Parameter.class).name();
-            StaticMethod<?> staticMethod = getStaticMethod(clazz, name.isEmpty() ? injectField.getName() : name, getParameterTypes(injectField));
+            String name = injectField.isAnnotationPresent(Parameter.class) && !injectField.getAnnotation(Parameter.class).name().isEmpty()
+                ? injectField.getAnnotation(Parameter.class).name() : injectField.getName();
+            StaticMethod<?> staticMethod = getStaticMethod(clazz, name, getParameterTypes(injectField));
             if (staticMethod != null) {
                 injectField.setAccessible(true);
                 injectField.set(null, staticMethod);
@@ -89,8 +91,9 @@ public final class Reflection {
 
     private static void linkToField(Class<?> clazz, java.lang.reflect.Field injectField) {
         try {
-            String name = injectField.getAnnotation(Parameter.class).name();
-            Field<?> field = getField(clazz, name.isEmpty() ? injectField.getName() : name);
+            String name = injectField.isAnnotationPresent(Parameter.class) && !injectField.getAnnotation(Parameter.class).name().isEmpty()
+                ? injectField.getAnnotation(Parameter.class).name() : injectField.getName();
+            Field<?> field = getField(clazz, name);
             if (field != null) {
                 injectField.setAccessible(true);
                 injectField.set(null, field);
@@ -101,8 +104,9 @@ public final class Reflection {
 
     private static void linkToStaticField(Class<?> clazz, java.lang.reflect.Field injectField) {
         try {
-            String name = injectField.getAnnotation(Parameter.class).name();
-            StaticField<?> staticField = getStaticField(clazz, name.isEmpty() ? injectField.getName() : name);
+            String name = injectField.isAnnotationPresent(Parameter.class) && !injectField.getAnnotation(Parameter.class).name().isEmpty()
+                ? injectField.getAnnotation(Parameter.class).name() : injectField.getName();
+            StaticField<?> staticField = getStaticField(clazz, name);
             if (staticField != null) {
                 injectField.setAccessible(true);
                 injectField.set(null, staticField);
