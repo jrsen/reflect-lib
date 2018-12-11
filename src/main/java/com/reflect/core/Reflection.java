@@ -33,8 +33,7 @@ public final class Reflection {
     public static <T> Class<T> init(Class<T> srcClass, Class<?> injectClass) {
         java.lang.reflect.Field[] injectFields = injectClass.getDeclaredFields();
         for (java.lang.reflect.Field injectField : injectFields) {
-            if (!injectField.isAnnotationPresent(Parameter.class)
-                    && !Modifier.isStatic(injectField.getModifiers()))
+            if (!Modifier.isStatic(injectField.getModifiers()))
                 continue;
             Class<?> classType = injectField.getType();
             if (classType == Constructor.class) {
